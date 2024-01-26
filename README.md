@@ -1,2 +1,2 @@
 # xtea
-Header only *TEA* and *XTEA* encryption algorithm C++ library.
+Header only **TEA** and **XTEA** encryption algorithm **C++** library.

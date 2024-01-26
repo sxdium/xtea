@@ -6,17 +6,22 @@
 #include <stdint.h>
 #endif /* ifdef(QT_CORE_LIB) */
 
-#define TEA_BLOCK_SIZE 8
-#define USE_TEA_INSTEAD_OF_XTEA
+/**
+ * Uncomment the define to use TEA algorithm instead of XTEA.
+ * TEA has less complex key-schedule and a rearrangement of the shifts, XORs, and additions.
+ */
+ // #define USE_TEA_INSTEAD_OF_XTEA
 
 namespace XTea {
+
+#define BLOCK_SIZE 8
 
 typedef unsigned int  uint;
 typedef unsigned char uchar;
 
 /**
  * @brief DELTA
- * @details The magic number using in each XTEA round
+ * @details The magic number using in each XTEA algorithm round
  */
 constexpr const uint32_t DELTA = 0x9E3779B9;
 
@@ -24,7 +29,7 @@ constexpr const uint32_t DELTA = 0x9E3779B9;
 /**
  * @brief EncipherBlock
  * @param v 64 bit of block to encipher
- * @param key Any string of 128 bit long
+ * @param key Any 128-bit block
  * @param n_rounds Number of rounds. More rounds means
  * better cryptographic strength and is therefore slower execution time
  */
@@ -40,7 +45,7 @@ inline void EncipherBlock(uint32_t v[2], const uint32_t key[4], uint n_rounds) n
 /**
  * @brief DecipherBlock
  * @param v 64 bit of block to decipher
- * @param key Any string of 128 bit long which was used to encipher
+ * @param key Any 128-bit block which was used to encipher
  * @param n_rounds Number of rounds which was used to encipher
  */
 inline void DecipherBlock(uint32_t v[2], const uint32_t key[4], uint n_rounds) noexcept {
@@ -55,7 +60,7 @@ inline void DecipherBlock(uint32_t v[2], const uint32_t key[4], uint n_rounds) n
 /**
  * @brief EncipherBlock
  * @param v 64 bit of block to encipher
- * @param key Any string of 128 bit long
+ * @param key Any 128-bit block
  * @param n_rounds 4
  */
 inline void EncipherBlock(uint32_t v[2], const uint32_t key[4], uint n_rounds) noexcept {
@@ -70,7 +75,7 @@ inline void EncipherBlock(uint32_t v[2], const uint32_t key[4], uint n_rounds) n
 /**
  * @brief DecipherBlock
  * @param v 64 bit of block to decipher
- * @param key Any string of 128 bit long which was used to encipher
+ * @param key Any 128-bit block which was used to encipher
  * @param n_rounds Number of rounds which was used to encipher
  */
 inline void DecipherBlock(uint32_t v[2], const uint32_t key[4], uint n_rounds) noexcept {
@@ -86,16 +91,16 @@ inline void DecipherBlock(uint32_t v[2], const uint32_t key[4], uint n_rounds) n
 /**
  * @brief Encrypt
  * @param data Pointer to the data that will be encrypted. No additional data will be created
- * @param size Size of data provided in bytes. Must be multiple of XTEA_BLOCK_SIZE
- * @param key Any string of 128 bit long
+ * @param size Size of data provided, in bytes. Must be multiple of XTEA_BLOCK_SIZE
+ * @param key Any 128-bit block
  * @param n_rounds Number of rounds. More rounds means
  * better cryptographic strength and is therefore slower execution time
  */
 inline void Encrypt(uchar* data, uint size, uchar* key, uint n_rounds = 32) noexcept {
-    int n_blocks = size / TEA_BLOCK_SIZE;
-    if(size % TEA_BLOCK_SIZE != 0) n_blocks++;
+    int n_blocks = size / BLOCK_SIZE;
+    if(size % BLOCK_SIZE != 0) n_blocks++;
     for(int i = 0; i < n_blocks; i++) {
-        EncipherBlock((uint32_t*)(data + (TEA_BLOCK_SIZE * i)), (uint32_t*)key, n_rounds);
+        EncipherBlock((uint32_t*)(data + (BLOCK_SIZE * i)), (uint32_t*)key, n_rounds);
     }
 }
 
@@ -103,14 +108,14 @@ inline void Encrypt(uchar* data, uint size, uchar* key, uint n_rounds = 32) noex
  * @brief Decrypt
  * @param data Pointer to the data that will be encrypted.
  * @param size Size of data provided in bytes. Must be multiple of XTEA_BLOCK_SIZE
- * @param key Any string of 128 bit long which was used to encipher
+ * @param key Any 128-bit block which was used to encipher
  * @param n_rounds Number of rounds which was used to encrypt
  */
 inline void Decrypt(uchar* data, uint size, uchar* key, uint n_rounds = 32) noexcept {
-    int n_blocks = size / TEA_BLOCK_SIZE;
-    if(size % TEA_BLOCK_SIZE != 0) n_blocks++;
+    int n_blocks = size / BLOCK_SIZE;
+    if(size % BLOCK_SIZE != 0) n_blocks++;
     for(int i = 0; i < n_blocks; i++) {
-        DecipherBlock((uint32_t*)(data + (TEA_BLOCK_SIZE * i)), (uint32_t*)key, n_rounds);
+        DecipherBlock((uint32_t*)(data + (BLOCK_SIZE * i)), (uint32_t*)key, n_rounds);
     }
 }
 
@@ -119,7 +124,7 @@ inline void Decrypt(uchar* data, uint size, uchar* key, uint n_rounds = 32) noex
 /**
  * @brief Encrypt
  * @param data Reference to data that will be encrypted with size multiple of XTEA_BLOCK_SIZE
- * @param key Any string of 128 bit long
+ * @param key Any bytearray of 128 bit long
  * @param n_rounds Number of rounds. More rounds means
  * better cryptographic strength and is therefore slower execution time
  */
@@ -130,7 +135,7 @@ inline void Encrypt(QByteArray& data, const QByteArray& key, uint n_rounds = 32)
 /**
  * @brief Decrypt
  * @param data Reference to data that will be encrypted with size multiple of XTEA_BLOCK_SIZE
- * @param key Any string of 128 bit long which was used to encrypt
+ * @param key Any bytearray of 128 bit long which was used to encrypt
  * @param n_rounds Number of rounds which was used to encrypt
  */
 inline void Decrypt(QByteArray& data, const QByteArray& key, uint n_rounds = 32) noexcept {
